@@ -22,12 +22,27 @@
 .chat{
   flex: 80;
 }
+.no-messages{
+  flex: 80;;
+}
 
 .sidebar{
   flex: 20;
   height:100%;
-  border-right: 1px solid black;
+ 
 }
+
+.sidebar-item{
+  cursor: pointer;
+  padding-top: 5px;
+}
+
+.sidebar-item-selected{
+  cursor: pointer;
+  padding-top: 5px;
+}
+
+
 
 
 
