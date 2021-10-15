@@ -20,8 +20,20 @@
 }
 
 .chat{
+  height:100%;
   flex: 80;
+  
 }
+
+.message-send{
+  
+  margin-left: 5px;
+  vertical-align: middle
+}
+.message-send:hover{
+  color: #4f7fa9;
+}
+
 .no-messages{
   flex: 80;;
 }
@@ -29,18 +41,62 @@
 .sidebar{
   flex: 20;
   height:100%;
+  margin-right: 5px;
  
+}
+
+.chat-input {
+  width: 80%;
+  padding: 10px 15px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  vertical-align: middle
 }
 
 .sidebar-item{
   cursor: pointer;
-  padding-top: 5px;
+  padding-top: 10px;
+  border:1px solid #414141;
+  border-radius: 5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
 }
+ .sidebar-item p{
+   text-align: center;
+   font-size: 1rem;
+   padding-left: 20px;
+ }
+ .trash-icon{
+   padding-right: 15px;
+ }
+ .trash-icon:hover{
+   color:#cb4c4e;
+ }
 
 .sidebar-item-selected{
   cursor: pointer;
   padding-top: 5px;
 }
+.add-channel{
+  cursor: pointer;
+  display:flex;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.add-channel p{
+  padding-top: 6px;
+  margin-left: 5px;
+  font-size: 1rem;
+  
+}
+.add-channel:hover > *{
+  color: #4f7fa9;
+}
+
 
 
 

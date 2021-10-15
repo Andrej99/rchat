@@ -10,7 +10,7 @@ const port = 3001
 
 
 //TODO Add timestamps to make message updates more efficient (store them in client).
-const channels = [{id:0, name:"Default", messages: []}];
+const channels = [];
 
 function getChannels(ch){
   return channels.map((channel) => {return {id: channel.id, name: channel.name}});
@@ -20,11 +20,14 @@ function getMessages(chname){
   console.log(channels);
   m = channels.find((elem) => elem.name === chname);
   console.log(m);
+  if(m===undefined){
+    return [];
+  }
 
   return m.messages;
 }
 
-var currentRoom = 'All chat';
+var currentRoom = 'Default';
 
 app.get('/', (req, res) => {
   console.log('dsds');
@@ -38,7 +41,10 @@ io.on('connection', (socket) => {
   socket.on("channel-add", (room,callback) =>{
     //TODO: Can't create channel with same name, don't assign same name to socket channels and channels
     //Error handling
-    var lid = channels.slice(-1)[0].id + 1;
+    var lid = 0;
+    if (channels.length > 0){
+      lid = channels.slice(-1)[0].id + 1;
+    }
     channels.push({id:lid, name: room, messages: []});
     console.log(socket.id, " Added: ",room);
     console.log(channels);
@@ -57,6 +63,14 @@ io.on('connection', (socket) => {
     socket.leave(currentRoom);
     socket.join(room);
     callback(getMessages(room));
+  });
+
+  socket.on("channel_remove", (room) => {
+    console.log("Removing channel: ",room);
+    currentRoom = "Default";
+    channels.splice(channels.findIndex((ch) => ch.name === room));
+    socket.broadcast.emit("remove-channel",room);
+
   });
   
 

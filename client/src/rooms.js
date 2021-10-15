@@ -1,5 +1,9 @@
 import React from 'react';
-import './index.css'
+import AddChannel from './addchannel';
+import './index.css';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrashCan} from '@fortawesome/free-solid-svg-icons';
 
 
 class SidebarItem extends React.Component{
@@ -7,6 +11,12 @@ class SidebarItem extends React.Component{
         super(props);
         this.state = {selected: false};
         this.Clicked = this.Clicked.bind(this);
+        this.removeChannel = this.removeChannel.bind(this);
+    }
+
+    removeChannel(e){
+        e.stopPropagation();
+        this.props.onRemoved(this.props.name);
     }
 
     Clicked(){
@@ -17,8 +27,9 @@ class SidebarItem extends React.Component{
     render(){
     //TODO Toggle on selected
         return (
-            <div className={this.state.selected ? "sidebar-item-selected": "sidebar-item"} onClick={this.Clicked} >
+            <div className={this.state.selected ? "sidebar-item": "sidebar-item"} onClick={this.Clicked}>
                 <p>{this.props.name}</p>
+                <FontAwesomeIcon icon={faTrashCan} className="trash-icon" onClick={this.removeChannel} />
             </div>
             );
 
@@ -29,33 +40,25 @@ class SidebarItem extends React.Component{
 class Rooms extends React.Component{
     constructor(props){
         super(props);
-        this.state = {value:""}
-        this.handleChange = this.handleChange.bind(this);
-        this.handleClick = this.handleClick.bind(this);
+
+        this.handleNewChannel = this.handleNewChannel.bind(this);
 
     }
 
-    handleChange(event) {
-        this.setState({value: event.target.value});
-    }
-
-    handleClick(){
-        if (this.state.value){
-            this.props.onRoomAdd(this.state.value)
-        }
+    handleNewChannel(value){
+            this.props.onRoomAdd(value); 
     }
 
 
     render(){
         const rooms = this.props.roomList.map( (rm) => {
-            return <SidebarItem key={rm.id} name={rm.name} onSelected = {this.props.onRoomSelcted}/>
+            return <SidebarItem key={rm.id} name={rm.name} onSelected = {this.props.onRoomSelcted} onRemoved = {this.props.onRoomRemove}/>
             
         });
 
     return (
     <div className="sidebar">
-        <input type="text" value={this.state.value} onChange={this.handleChange}/>
-        <button onClick={this.handleClick}>Add channel</button>
+        <AddChannel newChannel = {this.handleNewChannel}></AddChannel>
         {rooms}
     </div>
     );

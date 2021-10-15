@@ -14,6 +14,7 @@ class Chat extends React.Component{
         this.sendmsg = this.sendmsg.bind(this);
         this.roomSelect = this.roomSelect.bind(this);
         this.addRoom = this.addRoom.bind(this);
+        this.removeRoom = this.removeRoom.bind(this);
     }
 
     componentDidMount(){
@@ -29,16 +30,52 @@ class Chat extends React.Component{
             this.setState(prevState => ({messages: [...prevState.messages, arg]}))
         });
 
+        this.socket.on("remove-channel", (room) => {
+            if(this.state.room === room){
+                this.setState({room:null,messages:[]});
+            }
+            
+            const rm = this.state.rooms.findIndex( r => r.name === room);
+            const newArr = [].concat(this.state.rooms);
+            newArr.splice(rm,1);
+    
+            this.setState({rooms: newArr});
 
+        });
+
+
+    }
+
+    removeRoom(room){
+        //TODO Fix indexes (uid for each room on server)
+        console.log("Removing channel: ",room);
+        //TODO Check for errors from server
+        this.socket.emit("channel_remove",room);
+
+        if(this.state.room === room){
+            this.setState({room:null,messages:[]});
+        }
+
+        //TODO replace with filter
+        const rm = this.state.rooms.findIndex( r => r.name === room);
+        const newArr = [].concat(this.state.rooms);
+        newArr.splice(rm,1);
+
+        this.setState({rooms: newArr});
+        
     }
 
     roomSelect(room){
         console.log("room selected: ",room);
+    
+            
+       
         this.setState({room: room});
         this.socket.emit("get-messages",room,(responseData) => {
             console.log(responseData);
             this.setState({messages: responseData });
         });
+    
     }
 
     addRoom(room){
@@ -78,7 +115,7 @@ class Chat extends React.Component{
         <div className="container"> 
             <p>Hi {this.props.username}</p>
             <div className="content">
-                <Rooms roomList = {this.state.rooms} onRoomSelcted = {this.roomSelect} onRoomAdd = {this.addRoom}/>
+                <Rooms roomList = {this.state.rooms} onRoomSelcted = {this.roomSelect} onRoomAdd = {this.addRoom} onRoomRemove = {this.removeRoom}/>
                 {msg}
             </div>
         </div>
