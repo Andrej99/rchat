@@ -1,74 +1,82 @@
-const { exception } = require('console');
 const express = require('express');
-const app = express();
 const http = require('http');
+const login = require('./login');
+
+const app = express();
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+const DataInstance = require("./data");
+
+const Data = new DataInstance().getInstance();
 const port = 3001
 
+app.use('/login',login);
 
 //TODO Add timestamps to make message updates more efficient (store them in client).
-const channels = [];
-
-function getChannels(ch){
-  return channels.map((channel) => {return {id: channel.id, name: channel.name}});
-}
-
-function getMessages(chname){
-  console.log(channels);
-  m = channels.find((elem) => elem.name === chname);
-  console.log(m);
-  if(m===undefined){
-    return [];
-  }
-
-  return m.messages;
-}
-
-var currentRoom = 'Default';
 
 app.get('/', (req, res) => {
   console.log('dsds');
 });
 
-io.on('connection', (socket) => {
+
+io.use(function(socket,next){
+  if (socket.handshake.query && socket.handshake.query.token){
+    console.log(socket.handshake.query.token);
+    let token = Data.checkToken(socket.handshake.query.token);
+    
+    
+    if(token === undefined){
+      console.warn("Invalid token!")
+      return next(new Error('Authentication error'));
+    }
+    socket.token = token[1];
+    next();
+
+  }else{
+    console.warn("Authentication error");
+    next(new Error('Authentication error'));
+  }
+})
+.on('connection', (socket) => {
   console.log('a user connected:',socket.id);
-  socket.emit("channel_list",getChannels(channels));
+
+
+  socket.emit("channel_list",Data.getChannels());
 
 
   socket.on("channel-add", (room,callback) =>{
     //TODO: Can't create channel with same name, don't assign same name to socket channels and channels
     //Error handling
-    var lid = 0;
-    if (channels.length > 0){
-      lid = channels.slice(-1)[0].id + 1;
-    }
-    channels.push({id:lid, name: room, messages: []});
-    console.log(socket.id, " Added: ",room);
-    console.log(channels);
-    currentRoom = room;
-    socket.leave(currentRoom);
-    socket.join(room);
-    socket.broadcast.emit("channel_list",getChannels(channels));
-    callback(getChannels(channels)); 
+    Data.addUserChannel(room.channel);
+    console.log(room.name, " Added: ",room.channel);
+
+    let ch = Data.getUserChannel(room.name);
+    socket.leave(ch);
+    Data.setChannel(room.channel,room.name);
+    socket.join(room.channel);
+   
+
+    socket.broadcast.emit("channel_list",Data.getChannels());
+    callback(Data.getChannels()); 
   });
 
 
   socket.on("get-messages", (room,callback) => {
     //Error handling 
+    console.log(room);
+    let ch = Data.getUserChannel(room.name);
+    socket.leave(ch);
     console.log(socket.id, " joined: ",room);
-    currentRoom = room;
-    socket.leave(currentRoom);
-    socket.join(room);
-    callback(getMessages(room));
+    Data.setChannel(room.channel,room.name);
+    socket.join(room.channel);
+    callback(Data.getMessages(room.channel));
   });
 
   socket.on("channel_remove", (room) => {
     console.log("Removing channel: ",room);
-    currentRoom = "Default";
-    channels.splice(channels.findIndex((ch) => ch.name === room));
+    Data.removeChannel(room);
     socket.broadcast.emit("remove-channel",room);
 
   });
@@ -76,19 +84,19 @@ io.on('connection', (socket) => {
 
   socket.on('message',(arg)=>{
     console.log(arg);
-    i = channels.findIndex((elem) => elem.name === currentRoom);
-    channels[i].messages.push(arg);
-    socket.to(currentRoom).emit('response',arg);
+    Data.addMessage(arg);
+    socket.to(arg.channel).emit('response',arg);
 
   });
 
 
   socket.on('disconnect', () => {
     console.log('user disconnected');
+    Data.clearUser(socket.token.user);
   });
 });
 
 
 server.listen(port, () => {
-  console.log('listening on *: {port}');
+  console.log(`listening on port: ${port}`);
 });

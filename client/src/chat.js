@@ -18,8 +18,10 @@ class Chat extends React.Component{
     }
 
     componentDidMount(){
-        this.socket = io.connect('/');
-        this.socket.on("connection")
+        this.socket = io.connect('/',{
+            query: this.props.token,
+          });
+        
 
         this.socket.on("channel_list", (arg) => {
             console.log(arg);
@@ -42,6 +44,13 @@ class Chat extends React.Component{
             this.setState({rooms: newArr});
 
         });
+
+        this.socket.on("connect_error", (err) => {
+            console.log(`connect_error due to ${err.message}`);
+            alert("Authentication error!");
+            window.location.reload();
+
+          });
 
 
     }
@@ -71,7 +80,7 @@ class Chat extends React.Component{
             
        
         this.setState({room: room});
-        this.socket.emit("get-messages",room,(responseData) => {
+        this.socket.emit("get-messages",{channel:room,name:this.props.username},(responseData) => {
             console.log(responseData);
             this.setState({messages: responseData });
         });
@@ -82,7 +91,7 @@ class Chat extends React.Component{
         console.log("New room: ", room );
         this.setState({room: room,messages: []});
 
-        this.socket.emit("channel-add",room, (chlist) =>{
+        this.socket.emit("channel-add",{channel:room,name:this.props.username}, (chlist) =>{
             //TODO Handle errors...
             this.setState({rooms: chlist});
         });
@@ -92,7 +101,7 @@ class Chat extends React.Component{
     sendmsg(message){
         
         this.setState(prevState => ({messages: [...prevState.messages, {user: this.props.username,msg: message}]}))
-        this.socket.emit("message",{user: this.props.username,msg: message});
+        this.socket.emit("message",{channel:this.state.room,user: this.props.username,msg: message});
 
     }
 

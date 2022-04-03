@@ -2,7 +2,7 @@ import React from 'react';
 import './index.css'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleRight} from '@fortawesome/free-solid-svg-icons'
+import { faCircleRight} from '@fortawesome/free-solid-svg-icons';
 
 
 
