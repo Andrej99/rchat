@@ -4,7 +4,7 @@ const Jwt = require('./jwt');
 //TODO Add database
 class Data{
     constructor(){
-        this.users = [{username:"test",password:"test"},{username:"someone",password:"pass"}];
+        this.users = [{username:"test",password:"test"},{username:"user",password:"user"}];
         this.loggedOn = [];
 
         this.channels = [];

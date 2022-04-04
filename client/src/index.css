@@ -160,10 +160,13 @@
 }
 
 .login{
+
   display:flex;
 }
 
-
+.inf{
+  padding-top: 4px;
+}
 
 
 

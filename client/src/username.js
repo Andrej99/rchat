@@ -66,6 +66,7 @@ class ChooseUsername extends React.Component{
                  </label>
                  <p className="login-error">{this.state.error}</p>
                 <LoginButton clicked = {this.handleSubmit} loading = {this.state.loading}/>
+                <p className="inf">Test usernames and passwords: user-user test-test</p>
                 </div>
             </div>
         );
