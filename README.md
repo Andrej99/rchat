@@ -2,9 +2,9 @@
 A simple web chat.
 
 ### How to run
-node /server/main.js&
-cd client/src
-npm start
+- node /server/main.js&
+- cd client/src
+- npm start
 
 ### To do:
 - Use real database and in memory cache
